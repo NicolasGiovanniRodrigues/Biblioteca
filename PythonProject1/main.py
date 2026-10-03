@@ -27,7 +27,6 @@ if os.environ.get('FIREBIRD_CLIENT'):
 
 
 def conectar():
-    """Uma conexão por requisição; as rotas usam cursor, commit e rollback."""
     if 'con' not in g:
         configuracao = dict(database=database, user=user, password=password, charset='UTF8')
         if host:
@@ -348,7 +347,6 @@ def usuario_acao(id, acao):
 
 @app.cli.command('preparar-banco')
 def preparar_banco():
-    """Atualiza USUARIO sem alterar os livros do banco fornecido."""
     con = conectar()
     cursor = con.cursor()
     try:
