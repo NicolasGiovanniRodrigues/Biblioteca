@@ -1,97 +1,99 @@
-# Biblioteca
+# Biblioteca — modelo da aula
 
-Projeto acadêmico com back-end Flask, front-end HTML/Jinja2, CSS e JavaScript e banco relacional. Desenvolvido a partir dos exemplos de CRUD Flask/Firebird fornecidos.
+Projeto adaptado ao ZIP `PYCHARM-E-BANCO-main` enviado: Flask, driver **fdb**, banco **Firebird**, SQL direto e rotas em **PythonProject1/main.py**. A estrutura anterior com pacote `biblioteca` e SQLite foi substituída pelo modelo da professora.
 
-## Funcionalidades
+## Estrutura
 
-- Livros: criar, listar, buscar por título/autor, editar e excluir, com código automático.
-- Usuários: cadastrar, listar, editar, excluir, bloquear e desbloquear.
-- Administrador gerencia livros e usuários; leitor consulta o acervo.
-- Senhas armazenadas como hash Bcrypt com salt e custo 12, nunca em texto puro. Hash é uma transformação irreversível, não uma senha recuperável.
-- Senhas de 12 a 64 caracteres, até 72 bytes UTF-8, com maiúscula, minúscula, número e símbolo, validadas no servidor.
-- Cinco tentativas incorretas bloqueiam o login por 15 minutos. Administrador pode liberar antes. Bloqueio manual permanece até desbloqueio.
-- Bloqueio, exclusão e edição de usuário invalidam sessões existentes. Sessão expira após 30 minutos de inatividade.
-- Proteção CSRF em todos os formulários POST, SQL parametrizado e escape HTML do Jinja2.
-- Impede bloquear, excluir ou rebaixar o administrador que executa a ação.
+```text
+Biblioteca/
+├── BANCO.FDB
+├── PythonProject1/
+│   ├── main.py
+│   ├── templates/
+│   │   ├── livros.html
+│   │   ├── novo.html
+│   │   ├── editar.html
+│   │   ├── login.html
+│   │   ├── usuarios.html
+│   │   └── usuario_formulario.html
+│   └── static/
+│       ├── css/style.css
+│       └── js/script.js
+├── database/atualizar_usuario.sql
+├── tests/test_main.py
+└── requirements.txt
+```
 
-## Executar no Windows (Python 3.12 ou superior)
+## O que segue o exemplo da professora
 
-Abra o PowerShell na pasta do projeto:
+- `app = Flask(__name__)`, `fdb.connect`, `con.cursor`, `cursor.execute`, `fetchall` e `fetchone`.
+- SQL parametrizado com `?`, `con.commit()`, `con.rollback()` e fechamento do cursor no `finally`.
+- Tabela `LIVRO`: `ID_LIVRO`, `NOME`, `AUTOR`, `LIVRO` (tema) e `DATAPUBLICACAO` (ano inteiro).
+- Rotas `/`, `/novo`, `/criar`, `/editar/<int:id>` e `/deletar/<int:id>`.
+- Formulários com os nomes `nome`, `autor` e `ano`; templates acessam tuplas por índices (`livro[0]`, `livro[1]` etc.).
+- `BANCO.FDB` na raiz, como no material original. Os livros de exemplo foram preservados.
+
+## Requisitos adicionados
+
+- CRUD de usuários na tabela `USUARIO`, mantendo `ID_USUARIO`, `NOME`, `EMAIL` e `SENHA`.
+- Senha armazenada como **hash Bcrypt** (salt e custo 12), nunca como texto puro. O campo `SENHA` foi ampliado para VARCHAR(100).
+- Senha forte: de 12 a 64 caracteres, no máximo 72 bytes UTF-8, com maiúscula, minúscula, número e símbolo; validada no servidor.
+- Administrador gerencia livros e usuários. Leitor consulta a lista de livros.
+- Bloqueio manual até o administrador desbloquear; cinco erros de senha bloqueiam o login por 15 minutos.
+- Bloquear, editar ou excluir um usuário invalida suas sessões existentes. Sessão expira após 30 minutos de inatividade.
+- Proteção CSRF dos formulários; administrador não pode bloquear, excluir ou rebaixar a própria conta.
+- Correção do exemplo original: exclusão redireciona para `index`, pois o endpoint `livros` não existia. Foi adicionado o botão Deletar à lista.
+
+O banco entregue já está preparado para esses campos, sem usuários ou senhas de acesso cadastrados. Os dados de livros são os exemplos do banco fornecido. O arquivo de Downloads original não foi alterado.
+
+## Executar no PyCharm / Windows
+
+1. Instale Python 3.12 ou superior e **Firebird 4 de 64 bits**, compatível com o Python. O `BANCO.FDB` fornecido usa formato ODS 13.0; Firebird 3 não o abre diretamente.
+2. Abra a pasta raiz no PyCharm, crie um ambiente virtual e instale as dependências. No PowerShell da pasta raiz:
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 $env:SECRET_KEY = (.\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_hex(32))")
-.\.venv\Scripts\python.exe -m flask --app biblioteca init-db
-.\.venv\Scripts\python.exe -m flask --app biblioteca create-admin
-.\.venv\Scripts\python.exe -m flask --app biblioteca run
+$env:FIREBIRD_HOST = 'localhost'
+$env:FIREBIRD_USER = 'SYSDBA'
+$env:FIREBIRD_PASSWORD = 'senha-do-seu-servidor'
+$env:FIREBIRD_CLIENT = 'C:/Program Files/Firebird/Firebird_4_0/fbclient.dll'
+.\.venv\Scripts\python.exe -m flask --app PythonProject1/main.py preparar-banco
+.\.venv\Scripts\python.exe -m flask --app PythonProject1/main.py criar-admin
+.\.venv\Scripts\python.exe PythonProject1/main.py
 ```
 
-No cadastro do administrador, informe nome, e-mail e uma senha forte (a senha fica oculta). Abra http://127.0.0.1:5000 e faça login. Nenhuma conta ou senha padrão é distribuída. Mantenha a mesma SECRET_KEY nas próximas execuções; não publique a chave. Se omitida, uma chave temporária é gerada a cada início, encerrando sessões após reiniciar.
+3. Use a senha real do **seu servidor Firebird** na variável `FIREBIRD_PASSWORD`. No material da professora, o servidor estava configurado com `sysdba`; essa senha não é universal. O servidor precisa ter acesso ao caminho do arquivo `BANCO.FDB`. Ajuste o caminho de `fbclient.dll` conforme sua instalação.
+4. No comando `criar-admin`, informe nome, e-mail e uma senha forte; a senha fica oculta. Abra http://127.0.0.1:5000 e entre com esse usuário.
+5. No botão Run do PyCharm, selecione `PythonProject1/main.py`, o interpretador `.venv` e configure as mesmas variáveis de ambiente na Run Configuration. O caminho do banco é calculado a partir de `main.py`, independente do diretório de execução. Se necessário, configure `FIREBIRD_DATABASE` com o caminho absoluto do banco.
 
-SQLite é o padrão e cria `instance/biblioteca.db`. Os scripts de estrutura estão em `database/`. O banco com contas reais não deve ser enviado ao GitHub; a entrega inclui a estrutura e comando para criá-lo.
+`preparar-banco` pode ser repetido e também adapta uma cópia do banco original da aula; faça backup antes de migrar outro banco. Se outro banco tiver senhas antigas em texto puro, elas não permitem login: redefina-as pelo administrador. Nenhuma senha é convertida automaticamente. Mantenha uma `SECRET_KEY` persistente fora do GitHub; sem ela, uma chave temporária encerra as sessões ao reiniciar.
 
-## Executar com Firebird (conforme as aulas)
+## Testes com Firebird real
 
-Instale o servidor Firebird 3 ou superior e sua biblioteca cliente `fbclient.dll` compatível com a arquitetura do Python. Crie um banco vazio UTF8 com uma ferramenta Firebird (por exemplo, isql) e um usuário com permissão para criar as tabelas. Configure no PowerShell:
-
-```powershell
-$env:DB_ENGINE = 'firebird'
-$env:FIREBIRD_DATABASE = 'localhost:C:/dados/biblioteca.fdb'
-$env:FIREBIRD_USER = 'seu_usuario'
-$env:FIREBIRD_PASSWORD = 'sua_senha'
-.\.venv\Scripts\python.exe -m flask --app biblioteca init-db
-.\.venv\Scripts\python.exe -m flask --app biblioteca create-admin
-.\.venv\Scripts\python.exe -m flask --app biblioteca run
-```
-
-Execute `init-db` no Firebird apenas uma vez em banco vazio; não é uma migração. O mesmo aplicativo utiliza o driver `firebird-driver` e SQL compatível com ambos os bancos. A integração Firebird precisa ser validada em uma instalação Firebird; os testes automatizados usam SQLite.
-
-## Testes
+Os testes fazem cópias temporárias do banco entregue e usam **Firebird Embedded 4**, sem SQLite. Com a distribuição ZIP oficial do Firebird 4 extraída em uma pasta:
 
 ```powershell
+$env:FIREBIRD = 'C:/ferramentas/firebird4'
+$env:FIREBIRD_CLIENT = "$env:FIREBIRD/fbclient.dll"
+$env:FIREBIRD_TEST_CLIENT = $env:FIREBIRD_CLIENT
+$env:FIREBIRD_LOCK = "$PWD/.pytest_cache/firebird-locks"
+New-Item -ItemType Directory -Force $env:FIREBIRD_LOCK
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-Cobrem CRUD, senha forte/hash, autenticação, autorização, CSRF, bloqueio manual/automático e invalidação de sessões.
-
-## Estrutura
-
-```text
-biblioteca/
-  __init__.py     Rotas, autenticação, permissões e comandos CLI
-  db.py           Conexões, consultas e transações
-  templates/      Interface em português
-  static/         CSS responsivo e confirmação de exclusão
-database/         Estruturas SQLite e Firebird
-tests/            Testes de integração
-requirements.txt  Dependências
-```
+O banco de entrega não é modificado pelos testes. Sem `FIREBIRD_TEST_CLIENT`, os testes são sinalizados como ignorados, e isso não significa aprovação. A versão entregue foi validada com Firebird 4.0.6 Embedded em Windows.
 
 ## Roteiro de apresentação
 
-1. Criar o administrador e entrar.
-2. Cadastrar um livro, buscar, editar e excluir.
-3. Cadastrar um leitor; mostrar rejeição de senha fraca.
-4. Entrar como leitor e mostrar o acervo sem ações administrativas.
-5. Como administrador, bloquear o leitor e demonstrar a recusa de acesso.
-6. Desbloquear, errar cinco senhas e demonstrar o bloqueio temporário.
-7. Mostrar no banco apenas o hash Bcrypt, sem divulgar senhas reais.
+1. Mostrar `main.py`, as rotas e as consultas iguais à estrutura da aula.
+2. Cadastrar, listar, editar e deletar um livro.
+3. Cadastrar um leitor e mostrar a recusa de senha fraca.
+4. Bloquear e desbloquear o leitor; demonstrar que a sessão é encerrada.
+5. Errar cinco senhas e mostrar o bloqueio temporário.
+6. Mostrar o campo `SENHA` com hash Bcrypt e a tabela `LIVRO` preservada.
 
-## Publicar no GitHub
+Repositório: https://github.com/NicolasGiovanniRodrigues/Biblioteca
 
-Destino escolhido: conta `NicolasGiovanniRodrigues`, repositório `Biblioteca`.
-
-Crie um repositório vazio nesse nome em https://github.com/new (sem README ou .gitignore gerados pelo GitHub). Na pasta do projeto:
-
-```powershell
-git init -b main
-git add .
-git commit -m "Projeto Biblioteca: CRUD e autenticação"
-git remote add origin https://github.com/NicolasGiovanniRodrigues/Biblioteca.git
-git push -u origin main
-```
-
-Autentique no GitHub quando solicitado. O endereço esperado após a publicação é https://github.com/NicolasGiovanniRodrigues/Biblioteca . Esse endereço só funciona depois que o repositório for criado e enviado.
-
-Para uso público, execute com servidor WSGI e HTTPS, configure `COOKIE_SECURE=1`, uma chave secreta persistente e credenciais do banco via ambiente. O servidor `flask run` é destinado ao desenvolvimento local. O bloqueio por conta não substitui limitação de tráfego por IP em uma implantação pública.
+O servidor Flask deste projeto é para desenvolvimento e apresentação local. Para hospedar publicamente, use HTTPS, servidor WSGI, `COOKIE_SECURE=1`, chave persistente e credenciais próprias do banco.
