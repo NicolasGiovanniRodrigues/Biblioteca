@@ -1,4 +1,3 @@
-"""Biblioteca: estrutura das aulas, Flask + fdb + Firebird."""
 import os
 import re
 import secrets
@@ -19,7 +18,6 @@ app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax',
                   PERMANENT_SESSION_LIFETIME=timedelta(minutes=30), MAX_CONTENT_LENGTH=65536)
 bcrypt = Bcrypt(app)
 
-# O BANCO.FDB fica um nível acima do main.py, como no ZIP da professora.
 host = os.environ.get('FIREBIRD_HOST', 'localhost')
 database = os.environ.get('FIREBIRD_DATABASE', str(Path(__file__).resolve().parent.parent / 'BANCO.FDB'))
 user = os.environ.get('FIREBIRD_USER', 'SYSDBA')
@@ -188,7 +186,6 @@ def criar():
         if cursor.fetchone():
             flash('Erro ao cadastrar o livro. Ele já existe.')
             return redirect(url_for('novo'))
-        # Mantém o campo LIVRO (tema) do banco original da professora.
         cursor.execute('INSERT INTO LIVRO (NOME, AUTOR, LIVRO, DATAPUBLICACAO) VALUES (?, ?, ?, ?)', (nome, autor, None, ano))
         con.commit()
         flash('Livro cadastrado com sucesso.')
@@ -257,7 +254,6 @@ def deletar(id):
         flash('Ocorreu um erro ao deletar o livro.')
     finally:
         cursor.close()
-    # Corrige o endpoint inexistente "livros" do exemplo enviado.
     return redirect(url_for('index'))
 
 
@@ -365,7 +361,6 @@ def preparar_banco():
             if campo not in campos:
                 cursor.execute(f'ALTER TABLE USUARIO ADD {campo} {tipo}')
         con.commit()
-        # Impede cadastro duplicado mesmo com duas requisições simultâneas.
         cursor.execute("SELECT 1 FROM RDB$INDICES WHERE RDB$INDEX_NAME = 'UX_USUARIO_EMAIL'")
         if not cursor.fetchone():
             cursor.execute('CREATE UNIQUE INDEX UX_USUARIO_EMAIL ON USUARIO (EMAIL)')
