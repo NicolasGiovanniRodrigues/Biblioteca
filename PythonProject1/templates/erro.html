@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Erro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+<body>
+    {% include 'menu.html' %}
+    {% include 'mensagens.html' %}
+    <main>
+<h2>Erro {{ erro.code }}</h2><p>{{ erro.description }}</p><a href="{{ url_for('index') }}">Voltar para a lista</a>
+    </main>
+</body>
+</html>

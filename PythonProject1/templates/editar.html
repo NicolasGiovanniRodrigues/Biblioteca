@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editar Livro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+<body>
+    {% include 'menu.html' %}
+    {% include 'mensagens.html' %}
+    <main>
+<form class="formulario" action="{{ url_for('editar', id=livro[0]) }}" method="post">
+<h2>Editar Livro</h2><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="titulo">Título:</label><input type="text" id="titulo" name="nome" maxlength="254" value="{{ livro[1] }}" required>
+<label for="autor">Autor:</label><input type="text" id="autor" name="autor" maxlength="254" value="{{ livro[2] }}" required>
+<label for="ano">Ano de Publicação:</label><input type="number" id="ano" name="ano" min="1" max="{{ ano_maximo }}" value="{{ livro[3] }}" required>
+<button type="submit">Salvar Alterações</button>
+<a href="{{ url_for('index') }}">Cancelar</a></form>
+    </main>
+</body>
+</html>

@@ -1,0 +1,3 @@
+{% with messages = get_flashed_messages() %}
+{% if messages %}<div class="flash-messages" role="status">{% for message in messages %}<div class="flash">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% endwith %}

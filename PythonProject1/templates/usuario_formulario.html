@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cadastro de Usuário</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+<body>
+    {% include 'menu.html' %}
+    {% include 'mensagens.html' %}
+    <main>
+<form class="formulario" method="post"><h2>{{ 'Editar Usuário' if editando else 'Cadastrar Usuário' }}</h2><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="nome">Nome:</label><input id="nome" name="nome" maxlength="100" value="{{ usuario[1] if usuario else '' }}" required>
+<label for="email">E-mail:</label><input id="email" name="email" type="email" maxlength="100" value="{{ usuario[2] if usuario else '' }}" required>
+<label for="perfil">Perfil:</label><select id="perfil" name="perfil"><option value="leitor">Leitor (consulta livros)</option><option value="admin" {{ 'selected' if usuario and usuario[3] == 'admin' }}>Administrador</option></select>
+<label for="senha">{{ 'Nova senha (opcional)' if editando else 'Senha' }}:</label><input id="senha" name="senha" type="password" autocomplete="new-password" minlength="12" maxlength="64" {{ 'required' if not editando }} aria-describedby="regra-senha">
+<p id="regra-senha">12 a 64 caracteres, até 72 bytes, com maiúscula, minúscula, número e símbolo. {{ 'Deixe vazio para manter a senha.' if editando }}</p>
+<button type="submit">Salvar</button><a href="{{ url_for('usuarios') }}">Cancelar</a></form>
+    </main>
+</body>
+</html>

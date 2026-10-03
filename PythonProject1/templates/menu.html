@@ -1,0 +1,4 @@
+<header><h1>Biblioteca</h1>
+{% if g.usuario %}<nav><a href="{{ url_for('index') }}">Lista de livros</a>
+{% if g.usuario[4] == 'admin' %}<a href="{{ url_for('novo') }}">Cadastrar livro</a><a href="{{ url_for('usuarios') }}">Usuários</a>{% endif %}
+<span>{{ g.usuario[1] }}</span><form class="inline" action="{{ url_for('sair') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Sair</button></form></nav>{% endif %}</header>

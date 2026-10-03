@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lista de Livros</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+<body>
+    {% include 'menu.html' %}
+    {% include 'mensagens.html' %}
+    <main>
+<h2>Lista de livros</h2>
+{% if g.usuario[4] == 'admin' %}<a href="{{ url_for('novo') }}" class="btn-novo">Cadastrar Novo Livro</a>{% endif %}
+<div class="tabela"><table><thead><tr><th>Código</th><th>Nome</th><th>Autor</th><th>Ano de Publicação</th>{% if g.usuario[4] == 'admin' %}<th>Ações</th>{% endif %}</tr></thead>
+<tbody>{% for livro in livros %}<tr><td>{{ livro[0] }}</td><td>{{ livro[1] }}</td><td>{{ livro[2] }}</td><td>{{ livro[3] }}</td>
+{% if g.usuario[4] == 'admin' %}<td><a href="{{ url_for('editar', id=livro[0]) }}" class="btn-editar">Editar</a>
+<form class="inline" action="{{ url_for('deletar', id=livro[0]) }}" method="post" data-confirmar="Deletar este livro?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-deletar">Deletar</button></form></td>{% endif %}</tr>
+{% else %}<tr><td colspan="5">Nenhum livro cadastrado.</td></tr>{% endfor %}</tbody></table></div>
+    </main>
+</body>
+</html>

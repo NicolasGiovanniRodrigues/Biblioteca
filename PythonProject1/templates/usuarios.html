@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lista de Usuários</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+<body>
+    {% include 'menu.html' %}
+    {% include 'mensagens.html' %}
+    <main>
+<h2>Lista de usuários</h2><a class="btn-novo" href="{{ url_for('usuario_formulario') }}">Cadastrar Novo Usuário</a>
+<div class="tabela"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+{% for usuario in usuarios %}<tr><td>{{ usuario[1] }}</td><td>{{ usuario[2] }}</td><td>{{ usuario[3] }}</td><td>{{ 'Bloqueado' if usuario[4] else ('Bloqueio temporário' if usuario[5] > agora else 'Ativo') }}</td><td>
+<a class="btn-editar" href="{{ url_for('usuario_formulario', id=usuario[0]) }}">Editar</a>
+{% if usuario[0] != g.usuario[0] %}
+{% set acao = 'desbloquear' if usuario[4] or usuario[5] > agora else 'bloquear' %}
+<form class="inline" method="post" action="{{ url_for('usuario_acao', id=usuario[0], acao=acao) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>{{ acao|capitalize }}</button></form>
+<form class="inline" method="post" data-confirmar="Deletar este usuário?" action="{{ url_for('usuario_acao', id=usuario[0], acao='deletar') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-deletar">Deletar</button></form>
+{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+    </main>
+</body>
+</html>
